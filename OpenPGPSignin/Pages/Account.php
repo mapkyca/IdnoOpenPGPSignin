@@ -31,30 +31,22 @@
 		$session = \Idno\Core\site()->session();
 		$user = $session->currentUser();
 		
-                if (empty($public_key) && empty($private_key))
-                {	
-			// No key, generate
-		    
-		    
-		    
-			    // TODO
-		    
-		    
-
-		}
-		
 		if ($public_key && $private_key) {
 		    
 		    // Save key on keyring
+		    $gpg = new \gnupg();
 		    
+		    $pub = $gpg->import($public_key);
+		    $pri = $gpg->import($private_key);
 		    
-			// TODO
-		    
-		    
-		    
+		    error_log("PUBLIC: " . print_r($pub, true));
+		    error_log("PRIVATE: " . print_r($pri, true));
+			
 		    // Save public key against user
 		    $user->pgp_public_key = $public_key;
 		    $user->pgp_private_key = $private_key;
+		    
+		    $user->save();
 		}
 
                 $this->forward('/account/openpgpsignin/');
