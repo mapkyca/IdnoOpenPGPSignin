@@ -29,8 +29,6 @@
 		\Idno\Core\site()->addPageHandler('account/pgpkeys', '\IdnoPlugins\OpenPGPSignin\Pages\Account');
 		
 		
-		// Generate key tool
-		
 		
 		
 		// Extend private denied page (may require upstream change)
