@@ -58,7 +58,6 @@
 			// Yes, we have an endpoint URL, go get the key data
 			error_log("Retrieving key data...");
 			$key = trim(file_get_contents($endpoint_url));
-			error_log("Key is $key");
 		    }
 		    
 		    // If no key data, try and find key data within a classed block on the page
@@ -71,7 +70,7 @@
 		    
 		    // We have some key data, try and use it!
 		    if ($key) {
-			error_log("Some key data was found...");
+			error_log("Some key data was found... $key");
 			return $key;
 			
 		    }
@@ -130,7 +129,6 @@
 		
 		// Extend private denied page (may require upstream change)
 		
-		// Listen to friending event to find and attach public key (may require upstream change)
 		
 		
 		// Use openPGP.js to do encrypted message signin?
