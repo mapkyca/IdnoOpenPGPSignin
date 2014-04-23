@@ -30,6 +30,8 @@ When you follow a local or remote user, the plugin will attempt to fetch their p
 
 If you want to make your non-Idno presence compatible, then add one of the above to your profile page.
 
+The plugin then provides a mechanism for you to log in to a site using a public key, and so be able to see the post.
+
 Todo
 ----
 
