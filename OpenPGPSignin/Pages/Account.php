@@ -49,7 +49,7 @@
 		    $user->save();
 		}
 
-                $this->forward('/account/openpgpsignin/');
+                $this->forward('/account/pgpkeys/');
             }
 
         }
