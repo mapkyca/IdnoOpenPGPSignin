@@ -12,7 +12,7 @@ $user = $session->currentUser();
 </div>
 <div class="row">
     <div class="span10 offset1">
-        <form id="pgp-keys" action="/account/openpgpsignin/" class="form-horizontal" method="post">
+        <form id="pgp-keys" action="/account/pgpkeys/" class="form-horizontal" method="post">
 	    <input type="hidden" id="pgp-keys-userid" value="<?= $user->getHandle(); ?>@<?= \Idno\Core\site()->config()->host; ?>" />
 
             <div class="control-group">
@@ -43,7 +43,7 @@ $user = $session->currentUser();
             </div>
 
 
-<?= \Idno\Core\site()->actions()->signForm('/account/openpgpsignin/') ?>
+<?= \Idno\Core\site()->actions()->signForm('/account/pgpkeys/') ?>
 	  
         </form>
     </div>
