@@ -10,6 +10,20 @@ $user = $session->currentUser();
     </div>
 
 </div>
+<?php 
+    if (($user->pgp_public_key) && ($user->pgp_private_key)) {
+	?>
+<div class="row">
+    <div class="span9 offset1  well">
+	<p>Now you've saved your keys, you can sign in to other sites (that use this plugin) using your public key. Use this bookmarklet to make this process easier.</p>
+	
+	<?= $this->draw('openpgpsignin/bookmarklet'); ?>
+    </div>
+    
+</div>
+<?php
+    }
+    ?>
 <div class="row">
     <div class="span10 offset1">
         <form id="pgp-keys" action="/account/pgpkeys/" class="form-horizontal" method="post">
