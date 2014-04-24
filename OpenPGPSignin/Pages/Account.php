@@ -46,6 +46,15 @@
 		    $user->pgp_public_key = $public_key;
 		    $user->pgp_private_key = $private_key;
 		    
+		    if ((!$pub['fingerprint']) || (!$pri['fingerprint']))
+			throw new \Exception("Public and/or private key import failed, sorry!");
+		    
+		    $user->pgp_publickey_fingerprint = $pub['fingerprint'];
+		    $user->pgp_privatekey_fingerprint = $pri['fingerprint'];
+		    
+		    if ((!$user->pgp_publickey_fingerprint) || (!$user->pgp_privatekey_fingerprint))
+			throw new \Exception("Problem saving fingerprints");
+		    
 		    $user->save();
 		}
 

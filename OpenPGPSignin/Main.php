@@ -97,6 +97,9 @@
 		\Idno\Core\site()->template()->extendTemplate('account/menu/items', 'openpgpsignin/account/menu');
 		\Idno\Core\site()->addPageHandler('account/pgpkeys', '\IdnoPlugins\OpenPGPSignin\Pages\Account');
 		
+		// Login endpoint
+		\Idno\Core\site()->addPageHandler('account/pgpkeys/login', '\IdnoPlugins\OpenPGPSignin\Pages\Login');
+		
 		// When a friend is added, we want to retrieve their keys
 		\Idno\Core\site()->addEventHook('follow', function(\Idno\Core\Event $event) {
 
