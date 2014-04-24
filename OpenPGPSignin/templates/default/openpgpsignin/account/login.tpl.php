@@ -7,7 +7,7 @@
                     </p>
                     <div class="control-group">
                         <div class="controls">
-                            <textarea id="data" name="data" class="span4" style="display:none;"><?= htmlspecialchars($vars['data']); ?></textarea>
+                            <textarea id="signature" name="signature" class="span4" style="display:none;"><?= htmlspecialchars($vars['signature']); ?></textarea>
                         </div>
                     </div>
 		    <input type="hidden" name="user" value="<?= $vars['user']; ?>" />
