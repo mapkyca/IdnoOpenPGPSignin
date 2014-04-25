@@ -10,7 +10,6 @@
                             <textarea id="signature" name="signature" class="span4" style="display:none;"><?= htmlspecialchars($vars['signature']); ?></textarea>
                         </div>
                     </div>
-		    <input type="hidden" name="user" value="<?= $vars['user']; ?>" />
                 </div>
             </div>
     </form>

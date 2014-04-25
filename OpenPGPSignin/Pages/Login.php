@@ -28,7 +28,7 @@
 		
 		if (!$gpg->addsignkey($user->pgp_privatekey_fingerprint, '')) throw new \Exception('There was a problem adding the signing key, have you set your keypair?','');
 		
-		$signature = $gpg->sign($returnURL);
+		$signature = $gpg->sign($user->getUrl());
 		if (!$signature) throw new \Exception('There was a problem signing: ' . $gpg -> geterror());
 		
 		
