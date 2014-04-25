@@ -103,11 +103,12 @@
 		// When a friend is added, we want to retrieve their keys
 		\Idno\Core\site()->addEventHook('follow', function(\Idno\Core\Event $event) {
 
-                    $user = $event->data()['following'];
+		    $user = $event->data()['user'];
+                    $following = $event->data()['following'];
 
-                    if ($user instanceof User) {
+                    if (($user instanceof \Idno\Entities\User) && ($following instanceof \Idno\Entities\User)) {
                         
-			if ($publickey = $this->findPublicKey($user->getURL())) {
+			if ($publickey = $this->findPublicKey($following->getURL())) {
 			    // We found a public key here, so...
 			    
 			    
@@ -119,8 +120,11 @@
 			    if ($result && isset($result['fingerprint'])) {
 				error_log("Imported public key, with fingerprint {$result['fingerprint']}");
 
-				$user->pgp_publickey_fingerprint = $result['fingerprint'];
-				$user->save();
+				// Save against following user
+				
+				$following->pgp_publickey_fingerprint = $result['fingerprint'];
+				$following->save();
+				
 			    }
 			    
 			}
@@ -129,13 +133,76 @@
 
                 });
 		
-		
-		// Extend private denied page (may require upstream change)
-		
-		
-		
-		// Use openPGP.js to do encrypted message signin?
-		
+		// Hook in and extend the canView architecture, checking signatures
+		\Idno\Core\site()->addEventHook('canView', function(\Idno\Core\Event $event) {
+		    
+		    if (isset($_REQUEST['signature'])) $_SESSION['_PGP_SIGNATURE'] = $_REQUEST['signature'];
+		    if (isset($_REQUEST['user'])) $_SESSION['_PGP_USER'] = $_REQUEST['user'];
+		    
+		    if ($_SESSION['_PGP_SIGNATURE'] && $_SESSION['_PGP_USER']) {
+			
+			$signature = $_SESSION['_PGP_SIGNATURE'];
+			$user_id = $_SESSION['_PGP_USER'];
+			
+			$link = null;
+			if (preg_match("/(https?:\/\/[^\s]+)/", $sig, $matches))
+				$link = $matches[1];
+			
+			if ($link) {
+			
+			    // We have a signed link, check that it's local
+			    if (\Idno\Common\Entity::isLocalUUID($link)) {
+				
+				// It is local, lets verify the signature
+				
+				// What object are we talking about?
+				$object = $event->data['object'];
+				
+				// Get owner of object
+				$owner = $object->getOwner();
+				
+				// See if $user_id is in my following list as either a uuid or a profile url
+				$remote_user = NULL;
+				foreach ($owner->getFollowingArray() as $uuid => $data){
+				    if ((trim($uuid, ' /') == trim($user_id, ' /')) || (trim($data['url'], ' /') == trim($user_id, ' /')))
+				    {
+					// We found a following user, 
+					$remote_user = \Idno\Common\Entity::getByUUID($uuid);
+				    }
+				}
+				
+				if ($remote_user) {
+				    
+				    if ($fingerprint = $remote_user->pgp_publickey_fingerprint) {
+					
+					$gpg = new \gnupg();
+					
+					if ($info = $gpg->verify($signature, false)) {
+					    
+					    if ($info['fingerprint'] == $fingerprint)
+						$event->setResponse(true);
+					    else 
+						throw new \Exception ("Fingerprint {$info['fingerprint']} does not match $fingerprint");
+					    
+					} else
+					    throw new \Exception ("Problem verifying your signature: " . $gpg->geterror());
+					
+				    } else
+					throw new \Exception ("Problem verifying your signature, no fingerprint found!");
+				    
+				    
+				} else	
+				    throw new \Exception ("Sorry, this user doesn't follow you...");
+				
+			    }
+			    else 
+				throw new \Exception ('Errp, link doesn\'t appear to be local, aborting');
+			}
+			else 
+			    throw new \Exception("No link found in signature, aborting.");
+			
+		    }
+		});
             }
         }
     }
