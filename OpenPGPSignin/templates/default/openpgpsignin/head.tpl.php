@@ -1,7 +1,7 @@
 <?php
     $currentpage = \Idno\Core\site()->currentPage();
     
-    if ($currentpage->matchUrl('/profile/([A-Za-z0-9]+)/?')) {
+    if (is_callable([$currentpage, 'matchUrl']) && $currentpage->matchUrl('/profile/([A-Za-z0-9]+)/?')) {
 	$url = $currentpage->currentUrl();
 	$url = trim($url, '/ ') . '/';
 	
