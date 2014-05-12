@@ -114,7 +114,7 @@
 			    
 			    // Save it to the keyring
 			    $gpg = new \gnupg();
-			    $result = $gpg->import($public_key);
+			    $result = $gpg->import($publickey);
 
 			    // Save a signature against the user
 			    if ($result && isset($result['fingerprint'])) {
@@ -125,6 +125,8 @@
 				$following->pgp_publickey_fingerprint = $result['fingerprint'];
 				$following->save();
 				
+			    } else {
+				error_log("Key data could not be imported");
 			    }
 			    
 			}
