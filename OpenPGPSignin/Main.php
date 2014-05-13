@@ -141,6 +141,26 @@
 		    $_SESSION['_PGP_SIGNATURE'] = $_REQUEST['signature'];
 		}
 		
+		// Log user in based on their signature
+		
+		// Check following in canview (valid user, still logged in, but no longer following)
+		\Idno\Core\site()->addEventHook('canView', function(\Idno\Core\Event $event) {
+		    
+		    // What object are we talking about?
+		    $object = $event->data['object'];
+
+		    // Get owner of object
+		    $owner = $object->getOwner();
+
+		    if ($owner->isFollowing(\Idno\Core\site()->session()->currentUser()))
+			return true;
+		    else
+			\Idno\Core\site()->session()->addMessage("Sorry, this user doesn't follow you...", 'alert-danger');
+		    
+		    return false;
+		    
+		});
+		
 		// Hook in and extend the canView architecture, checking signatures
 		/*\Idno\Core\site()->addEventHook('canView', function(\Idno\Core\Event $event) {
 		    
