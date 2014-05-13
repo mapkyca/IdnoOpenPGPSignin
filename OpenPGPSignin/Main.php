@@ -4,6 +4,20 @@
         class Main extends \Idno\Common\Plugin {
 	    
 	    /**
+	     * Retrieve a user associated with a PGP key fingerprint.
+	     * @return \Idno\Entities\User
+	     */
+	    private function getUserByFingerprint($fingerprint) {
+		if ($result = \Idno\Core\site()->db()->getObjects(get_called_class(), array('pgp_publickey_fingerprint' => $fingerprint), null, 1)) {
+                    foreach ($result as $row) {
+                        return $row;
+                    }
+                }
+
+                return false;
+	    }
+	    
+	    /**
 	     * When given a profile page, it will attempt to find the appropriate public key data.
 	     * 
 	     * First it'll look for a <link href="......" rel="key"> in the header, or a Link: <url>; rel="key" in the header.
@@ -141,7 +155,41 @@
 		    $_SESSION['_PGP_SIGNATURE'] = $_REQUEST['signature'];
 		}
 		
-		// Log user in based on their signature
+		// Log user in based on their signature (if there is no logged in user, and signature present in session
+		if (isset($_SESSION['_PGP_SIGNATURE']) && (!\Idno\Core\site()->session()->currentUser())) {
+		    
+		    $signature = $_SESSION['_PGP_SIGNATURE'];
+		    
+		    $user_id = null;
+		    if (preg_match("/(https?:\/\/[^\s]+)/", $sig, $matches))
+			    $user_id = $matches[1];
+		    
+		    if ($user_id) {
+			
+			$gpg = new \gnupg();
+
+			$signature = substr($signature, strpos($signature, '-----BEGIN PGP SIGNATURE-----')); // GPG verify won't take the full sig, so only return the appropriate bit
+
+			if ($info = $gpg->verify($signature, false)) {
+			    
+			    // Get user
+			    if ($user = $this->getUserByFingerprint($info['fingerprint']))
+			    {
+				// Got a user, log them in!
+				error_log("{$info['fingerprint']} matches user {$user->name}");
+				
+				\Idno\Core\site()->session()->logUserOn($user);
+			    }
+			    else 
+				throw new \Exception ("Fingerprint {$info['fingerprint']} does not match an known user!");
+
+			} else
+			    throw new \Exception ("Problem verifying your signature: " . $gpg->geterror());
+			
+		    }
+		    else 
+		        throw new \Exception("No profile link found in signature, aborting.");
+		}
 		
 		// Check following in canview (valid user, still logged in, but no longer following)
 		\Idno\Core\site()->addEventHook('canView', function(\Idno\Core\Event $event) {
