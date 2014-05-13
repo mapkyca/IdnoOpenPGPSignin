@@ -3,16 +3,40 @@
     namespace IdnoPlugins\OpenPGPSignin {
         class Main extends \Idno\Common\Plugin {
 	    
+	    private function getFingerprintsFromKeyinfo($key_info, array &$fingerprints) {
+		foreach ($key_info as $info) {
+		    // Fingerprint found, so add it
+		    if (isset($info['fingerprint'])) {
+			$fingerprints[] = $info['fingerprint'];
+		    }
+		    // If there are subkeys
+		    if (isset($info['subkeys']))
+			$this->getFingerprintsFromKeyinfo ($info['subkeys'], $fingerprints);
+		}
+	    }
+	    
 	    /**
 	     * Retrieve a user associated with a PGP key fingerprint.
 	     * @return \Idno\Entities\User
 	     */
-	    private function getUserByFingerprint($fingerprint) {
-		if ($result = \Idno\Core\site()->db()->getObjects(get_called_class(), array('pgp_publickey_fingerprint' => $fingerprint), null, 1)) {
-                    foreach ($result as $row) {
-                        return $row;
-                    }
-                }
+	    private function getUserByKeyInfo(array $key_info) {
+		$fingerprints = [];
+		$this->getFingerprintsFromKeyinfo($key_info, $fingerprints); // Find fingerprints from keys and subkeys
+		
+		foreach ($fingerprints as $fingerprint) {
+		    error_log("Looking for users identified with $fingerprint");
+		    
+		    if ($result = \Idno\Core\site()->db()->getObjects('Idno\\Entities\\User', array('pgp_publickey_fingerprint' => $fingerprint), null, 1)) {
+			foreach ($result as $row) {
+			    return $row;
+			}
+		    }
+		    if ($result = \Idno\Core\site()->db()->getObjects('Idno\\Entities\\RemoteUser', array('pgp_publickey_fingerprint' => $fingerprint), null, 1)) {
+			foreach ($result as $row) {
+			    return $row;
+			}
+		    }
+		}
 
                 return false;
 	    }
@@ -153,6 +177,7 @@
 		if (isset($_REQUEST['signature'])) {
 		    error_log("Ooo... we have a signature, saving in session for later...");
 		    $_SESSION['_PGP_SIGNATURE'] = $_REQUEST['signature'];
+		    error_log("Signature is: {$_SESSION['_PGP_SIGNATURE']}");
 		}
 		
 		// Log user in based on their signature (if there is no logged in user, and signature present in session
@@ -161,7 +186,7 @@
 		    $signature = $_SESSION['_PGP_SIGNATURE'];
 		    
 		    $user_id = null;
-		    if (preg_match("/(https?:\/\/[^\s]+)/", $sig, $matches))
+		    if (preg_match("/(https?:\/\/[^\s]+)/", $signature, $matches))
 			    $user_id = $matches[1];
 		    
 		    if ($user_id) {
@@ -172,13 +197,21 @@
 
 			if ($info = $gpg->verify($signature, false)) {
 			    
+			    if (isset($info[0]))
+				$info = $info[0];
+			    
+			    error_log("Signature verified as : " . print_r($info, true));
+			    
+			    // Get some key info
+			    $key_info = $gpg->keyinfo($info['fingerprint']);
+			    
 			    // Get user
-			    if ($user = $this->getUserByFingerprint($info['fingerprint']))
+			    if ($user = $this->getUserByKeyInfo($key_info))
 			    {
 				// Got a user, log them in!
-				error_log("{$info['fingerprint']} matches user {$user->name}");
+				error_log("{$info['fingerprint']} matches user {$user->title}");
 				
-				\Idno\Core\site()->session()->addMessage("Welcome {$user->name}!");
+				\Idno\Core\site()->session()->addMessage("Welcome {$user->title}!");
 				
 				\Idno\Core\site()->session()->logUserOn($user);
 			    }
