@@ -142,7 +142,7 @@
 		}
 		
 		// Hook in and extend the canView architecture, checking signatures
-		\Idno\Core\site()->addEventHook('canView', function(\Idno\Core\Event $event) {
+		/*\Idno\Core\site()->addEventHook('canView', function(\Idno\Core\Event $event) {
 		    
 		    if ($_SESSION['_PGP_SIGNATURE']) {
 			
@@ -200,7 +200,7 @@
 			    throw new \Exception("No link found in signature, aborting.");
 			
 		    }
-		});
+		});*/
             }
         }
     }
