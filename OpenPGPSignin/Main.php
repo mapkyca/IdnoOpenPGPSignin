@@ -178,6 +178,8 @@
 				// Got a user, log them in!
 				error_log("{$info['fingerprint']} matches user {$user->name}");
 				
+				\Idno\Core\site()->session()->addMessage("Welcome {$user->name}!");
+				
 				\Idno\Core\site()->session()->logUserOn($user);
 			    }
 			    else 
