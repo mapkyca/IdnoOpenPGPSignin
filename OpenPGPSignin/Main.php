@@ -135,10 +135,14 @@
 
                 });
 		
+		// Signature specified on any page, grab it and save it
+		if (isset($_REQUEST['signature'])) {
+		    error_log("Ooo... we have a signature, saving in session for later...");
+		    $_SESSION['_PGP_SIGNATURE'] = $_REQUEST['signature'];
+		}
+		
 		// Hook in and extend the canView architecture, checking signatures
 		\Idno\Core\site()->addEventHook('canView', function(\Idno\Core\Event $event) {
-		    
-		    if (isset($_REQUEST['signature'])) $_SESSION['_PGP_SIGNATURE'] = $_REQUEST['signature'];
 		    
 		    if ($_SESSION['_PGP_SIGNATURE']) {
 			
