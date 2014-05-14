@@ -26,9 +26,9 @@ You public key is then made available by using a rel="key" link in the page head
 When you follow a local or remote user, the plugin will attempt to fetch their public key by doing the following, in order:
 
 1. Look in the HTTP header for a _Link: <....>; rel="key"_
-2. Look in the page metadata for _<meta href="...." rel="key" />_
-3. Look on the page for an _<a href="...." rel="key">_
-4. Look on the page for a <element class="key">....</element>
+2. Look in the page metadata for _```<meta href="...." rel="key" />```_
+3. Look on the page for an _```<a href="...." rel="key">```_
+4. Look on the page for a ```<element class="key">....</element>```
 
 If you want to make your non-Idno presence compatible, then add one of the above to your profile page.
 
