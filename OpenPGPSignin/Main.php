@@ -180,50 +180,57 @@
 		    error_log("Signature is: {$_SESSION['_PGP_SIGNATURE']}");
 		}
 		
-		// Log user in based on their signature (if there is no logged in user, and signature present in session
-		if (isset($_SESSION['_PGP_SIGNATURE']) && (!\Idno\Core\site()->session()->currentUser())) {
-		    
-		    $signature = $_SESSION['_PGP_SIGNATURE'];
-		    
-		    $user_id = null;
-		    if (preg_match("/(https?:\/\/[^\s]+)/", $signature, $matches))
-			    $user_id = $matches[1];
-		    
-		    if ($user_id) {
-			
-			$gpg = new \gnupg();
+		try {
 
-			$signature = substr($signature, strpos($signature, '-----BEGIN PGP SIGNATURE-----')); // GPG verify won't take the full sig, so only return the appropriate bit
+		    // Log user in based on their signature (if there is no logged in user, and signature present in session
+		    if (isset($_SESSION['_PGP_SIGNATURE']) && (!\Idno\Core\site()->session()->currentUser())) {
 
-			if ($info = $gpg->verify($signature, false)) {
-			    
-			    if (isset($info[0]))
-				$info = $info[0];
-			    
-			    error_log("Signature verified as : " . print_r($info, true));
-			    
-			    // Get some key info
-			    $key_info = $gpg->keyinfo($info['fingerprint']);
-			    
-			    // Get user
-			    if ($user = $this->getUserByKeyInfo($key_info))
-			    {
-				// Got a user, log them in!
-				error_log("{$info['fingerprint']} matches user {$user->title}");
-				
-				\Idno\Core\site()->session()->addMessage("Welcome {$user->title}!");
-				
-				\Idno\Core\site()->session()->logUserOn($user);
-			    }
-			    else 
-				throw new \Exception ("Fingerprint {$info['fingerprint']} does not match an known user!");
+			$signature = $_SESSION['_PGP_SIGNATURE'];
 
-			} else
-			    throw new \Exception ("Problem verifying your signature: " . $gpg->geterror());
-			
+			$user_id = null;
+			if (preg_match("/(https?:\/\/[^\s]+)/", $signature, $matches))
+				$user_id = $matches[1];
+
+			if ($user_id) {
+
+			    $gpg = new \gnupg();
+
+			    $signature = substr($signature, strpos($signature, '-----BEGIN PGP SIGNATURE-----')); // GPG verify won't take the full sig, so only return the appropriate bit
+
+			    if ($info = $gpg->verify($signature, false)) {
+
+				if (isset($info[0]))
+				    $info = $info[0];
+
+				error_log("Signature verified as : " . print_r($info, true));
+
+				// Get some key info
+				$key_info = $gpg->keyinfo($info['fingerprint']);
+
+				// Get user
+				if ($user = $this->getUserByKeyInfo($key_info))
+				{
+				    // Got a user, log them in!
+				    error_log("{$info['fingerprint']} matches user {$user->title}");
+
+				    \Idno\Core\site()->session()->addMessage("Welcome {$user->title}!");
+
+				    \Idno\Core\site()->session()->logUserOn($user);
+				}
+				else 
+				    throw new \Exception ("Fingerprint {$info['fingerprint']} does not match an known user!");
+
+			    } else
+				throw new \Exception ("Problem verifying your signature: " . $gpg->geterror());
+
+			}
+			else 
+			    throw new \Exception("No profile link found in signature, aborting.");
 		    }
-		    else 
-		        throw new \Exception("No profile link found in signature, aborting.");
+		
+		} catch (\Exception $e) {
+		    // RegisterPages doesn't have a default exception handler, so lets do something with error messages
+		    \Idno\Core\site()->session()->addMessage($e->getMessage(), 'alert-danger');
 		}
 		
 		// Check following in canview (valid user, still logged in, but no longer following)
