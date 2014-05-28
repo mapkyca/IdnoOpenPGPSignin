@@ -10,7 +10,7 @@
             
             function getContent()
             {
-                $this->gatekeeper(); // Logged-in users only
+                $this->createGatekeeper(); // Logged-in users only
                 $t = \Idno\Core\site()->template();
                 
                 $public_key = $this->getInput('public_key');
@@ -23,7 +23,7 @@
             }
 
             function postContent() {
-                $this->gatekeeper(); // Logged-in users only
+                $this->createGatekeeper(); // Logged-in users only
                 
                 $public_key = $this->getInput('public_key');
                 $private_key = $this->getInput('private_key');
