@@ -28,10 +28,10 @@
 		
 		if (!$gpg->addsignkey($user->pgp_privatekey_fingerprint, '')) throw new \Exception('There was a problem adding the signing key, have you set your keypair?','');
 		
-		$signature = $gpg->sign($user->getUrl());
+		$signature = $gpg->sign(date('c', time()) . " \n" .$user->getUrl() . " \n" . $returnURL);
 		if (!$signature) throw new \Exception('There was a problem signing: ' . $gpg -> geterror());
 		
-		
+			
 		// Render it and trigger a submit back
 		$body = $t->__(['signature' => $signature, 'user' => $user->getUrl(), 'return_url' => $returnURL])->draw('openpgpsignin/account/login');
                 $t->__(['title' => 'PGP Keys', 'body' => $body])->drawPage();
