@@ -42,7 +42,8 @@ Authentication Protocol
 * Alice adds Bob as a friend, Alice's site looks at Bob's profile and saves his public key
 * Alice repeats this for Clare, Dave, Emma, Fred etc...
 * Alice writes a post, and only wants Bob to be able to read it, so lists Bob's profile as an approved viewer (we have saved his public key and fingerprint)
-* Bob visits the private post, and is denied. Oh noes! He then signs his profile URL with his key, and then POSTs the ascii armoured signature as a ```signature``` variable.
+* Bob visits the private post, and is denied. Oh noes! He then forms a PGP signature over the ISO8601 date and time, his profile URL and the requested url, separated by new lines, with his key, 
+  and then POSTs the ascii armoured signature as a ```signature``` variable.
 * Alice verifies the signature, and compares the signing key's fingerprint against the fingerprint of the users who are permitted to view the post, and if they match, display it.
 
 One thing to note, although I talk about sites and services here, there is nothing about the protocol that *requires* server scripting (for Bob's part at least), you could use command line tools.
