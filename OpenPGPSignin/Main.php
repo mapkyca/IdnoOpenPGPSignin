@@ -219,6 +219,9 @@
 
 				if (isset($info[0]))
 				    $info = $info[0];
+				
+				if ($info['summary']==4)
+				    throw new \Exception('Sorry, the signature appears to be invalid'); // Not sure, but I think summary of 4 is an invalid signature, no docs, but seems to be from observation
 
 				error_log("Signature verified as : " . print_r($info, true));
 
