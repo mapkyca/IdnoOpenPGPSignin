@@ -188,9 +188,27 @@
 			$signature = $_SESSION['_PGP_SIGNATURE'];
 
 			$user_id = null;
-			if (preg_match("/(https?:\/\/[^\s]+)/", $signature, $matches))
-				$user_id = $matches[1];
-
+			$request_url = null;
+			if (preg_match_all("/(https?:\/\/[^\s]+)/", $signature, $matches, PREG_SET_ORDER)) {
+				$user_id = $matches[0][0];
+				$request_url = $matches[1][0]; 
+			}
+			
+			// Check that this is not sent to the wrong site
+			if (!$request_url) throw new \Exception ("Request URL missing from signature");
+			if (!\Idno\Common\Entity::isLocalUUID($request_url)) throw new \Exception ("Sorry, you're requesting a URL which does not belong to this site!");
+			
+			// Now, we check the timestamp to check for Replay attacks
+			$now = time();
+			if (preg_match('/([0-9]{4}-?[0-9]{2}-?[0-9]{2}T[0-9]{2}:?[0-9]{2}:?[0-9]{2}[+-Z]?([0-9]{2,4}:?([0-9]{2})?)?)/',$signature, $matches))
+			    $timestamp = strtotime($matches[0]);
+			
+			if (!$timestamp) throw new \Exception("No timestamp was found in signature! Make sure you include a timestamp in ISO8601 format");
+			if (($timestamp < $now - 5) || ($timestamp > $now + 5)) // 5 seconds grace either way
+			    throw new \Exception ("Sorry, you could not be logged in because the timestamp was wrong. Check your computer's clock is correct, and ideally connect to an internet time server!");
+			
+			// TODO: Check for double logins and log both out / store timestamp for a few seconds...
+			
 			if ($user_id) {
 
 			    $gpg = new \gnupg();
