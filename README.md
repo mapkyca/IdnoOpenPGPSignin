@@ -6,8 +6,6 @@ by their public PGP key, allowing you to write private posts that only they can 
 
 Roughly modelled on this: <https://www.marcus-povey.co.uk/2013/10/07/thoughts-private-posts-in-a-distributed-social-network/>
 
-***NOTE: At time of writing, you need to be running my following2 fork <https://github.com/mapkyca/idno/tree/following2> for this to work ***
-
 Requirements
 ------------
 
