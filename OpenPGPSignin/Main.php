@@ -213,7 +213,7 @@
 
 			    $gpg = new \gnupg();
 
-			    $signature = substr($signature, strpos($signature, '-----BEGIN PGP SIGNATURE-----')); // GPG verify won't take the full sig, so only return the appropriate bit
+			    //$signature = substr($signature, strpos($signature, '-----BEGIN PGP SIGNATURE-----')); // GPG verify won't take the full sig, so only return the appropriate bit
 
 			    if ($info = $gpg->verify($signature, false)) {
 
