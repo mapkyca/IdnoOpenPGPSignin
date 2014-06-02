@@ -52,7 +52,7 @@
 	     */
 	    private function findPublicKey($url) {
 		
-		if ($page = file_get_contents($url)) {
+		if ($page = \Idno\Core\Webservice::file_get_contents($url)) {
 		    
 		    $endpoint_url = null;
 		    
